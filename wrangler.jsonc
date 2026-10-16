@@ -1,0 +1,14 @@
+// Cloudflare: serves build/web. Deploy with `npm run deploy`.
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "app",
+  "compatibility_date": "2026-10-01",
+  // Only video requests go through worker.js (byte ranges for Safari).
+  "main": "worker.js",
+  "assets": {
+    "directory": "./build/web",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": ["/videos/*"]
+  }
+}

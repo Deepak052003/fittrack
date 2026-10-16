@@ -1,0 +1,9 @@
+# Cloudflare response headers.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=()
+
+# Always revalidate the service worker.
+/sw.js
+  Cache-Control: no-cache

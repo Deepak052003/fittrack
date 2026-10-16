@@ -1,0 +1,21 @@
+{
+  "name": "fittrack",
+  "private": true,
+  "description": "FitTrack web build + Cloudflare deploy scripts (the app itself is Flutter).",
+  "type": "module",
+  "scripts": {
+    "build": "node tool/build_web.mjs",
+    "preview": "node tool/build_web.mjs && wrangler dev",
+    "deploy": "node tool/build_web.mjs && wrangler deploy",
+    "compress-videos": "node tool/compress_videos.mjs"
+  },
+  "devDependencies": {
+    "ffmpeg-static": "^5.3.0",
+    "wrangler": "^4.151.0"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "workerd@1.20261012.1": true,
+    "ffmpeg-static@5.3.0": true
+  }
+}

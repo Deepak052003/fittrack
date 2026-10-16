@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="$FLUTTER_BASE_HREF">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="FitTrack: gym and home workouts with form videos, rep counter and rest timer. No sign-up needed.">
+
+  <!-- Status bar color (updated by the app). -->
+  <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0b132b">
+  <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b132b">
+
+  <!-- PWA + iOS home-screen app -->
+  <link rel="manifest" href="manifest.json">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="FitTrack">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="icon" type="image/png" href="favicon.png">
+
+  <title>FitTrack</title>
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #0b132b; }
+    #splash {
+      position: fixed; inset: 0; z-index: 10;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px;
+      background: #0b132b; transition: opacity .3s ease;
+    }
+    #splash img { width: 96px; height: 96px; }
+    #splash .bar { position: relative; width: 120px; height: 4px; border-radius: 2px; overflow: hidden; background: rgba(255, 107, 53, .2); }
+    #splash .bar::after {
+      content: ""; position: absolute; inset: 0; width: 40%; border-radius: 2px; background: #ff6b35;
+      animation: splash-load 1.1s ease-in-out infinite;
+    }
+    #splash.hide { opacity: 0; pointer-events: none; }
+    @keyframes splash-load { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+    @media (prefers-color-scheme: dark) {
+      html, body, #splash { background: #0b132b; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #splash .bar::after { animation: none; width: 100%; }
+    }
+  </style>
+
+  <script>
+    // Called from Dart: lib/pwa/pwa_platform_web.dart.
+    (function () {
+      var deferredPrompt = null;
+      var updateReady = false;
+      var listeners = [];
+      var beepCtx = null, wakeLock = null, wantWakeLock = false;
+      function requestWakeLock() {
+        if (!wantWakeLock || !('wakeLock' in navigator) || document.visibilityState !== 'visible') return;
+        navigator.wakeLock.request('screen').then(function (lock) {
+          if (wantWakeLock) wakeLock = lock; else lock.release();
+        }).catch(function () {});
+      }
+      document.addEventListener('visibilitychange', requestWakeLock);
+      function audioCtx() {
+        return beepCtx || (beepCtx = new (window.AudioContext || window.webkitAudioContext)());
+      }
+      function notify() { listeners.forEach(function (cb) { try { cb(); } catch (e) { console.error(e); } }); }
+
+      window.addEventListener('beforeinstallprompt', function (e) {
+        e.preventDefault(); // Use our own Install button.
+        deferredPrompt = e;
+        notify();
+      });
+      window.addEventListener('appinstalled', function () { deferredPrompt = null; notify(); });
+
+      window.fitPwa = {
+        canInstall: function () { return !!deferredPrompt; },
+        isStandalone: function () {
+          return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+        },
+        isIos: function () {
+          return /iphone|ipad|ipod/i.test(navigator.userAgent) ||
+            (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        },
+        isAndroid: function () { return /android/i.test(navigator.userAgent); },
+        // Browsers inside other apps (LinkedIn, Instagram, Facebook...) cannot install.
+        isInAppBrowser: function () {
+          return /LinkedInApp|FBAN|FBAV|FB_IAB|Instagram|Snapchat|Line\/|MicroMessenger|Twitter|; wv\)/i.test(navigator.userAgent);
+        },
+        // Android: opens this page in Chrome. Returns false where that is not possible.
+        openInBrowser: function () {
+          if (!/android/i.test(navigator.userAgent)) return false;
+          location.href = "intent://" + location.host + location.pathname +
+            "#Intent;scheme=https;package=com.android.chrome;end";
+          return true;
+        },
+        updateReady: function () { return updateReady; },
+        promptInstall: async function () {
+          if (!deferredPrompt) return false;
+          var prompt = deferredPrompt;
+          deferredPrompt = null;
+          prompt.prompt();
+          var choice = await prompt.userChoice;
+          notify();
+          return choice.outcome === 'accepted';
+        },
+        reload: function () { window.location.reload(); },
+        // Call from a tap: iOS only starts audio during a user gesture.
+        unlockAudio: function () {
+          try {
+            var ctx = audioCtx();
+            if (ctx.state !== 'running') ctx.resume();
+            var src = ctx.createBufferSource();
+            src.buffer = ctx.createBuffer(1, 1, ctx.sampleRate);
+            src.connect(ctx.destination);
+            src.start(0);
+          } catch (e) { /* no audio available */ }
+        },
+        // Short tick, or long=true for the higher "go" tone.
+        beep: function (long) {
+          try {
+            var ctx = audioCtx();
+            if (ctx.state !== 'running') ctx.resume();
+            var osc = ctx.createOscillator(), gain = ctx.createGain();
+            osc.connect(gain); gain.connect(ctx.destination);
+            var length = long ? 0.6 : 0.15;
+            osc.frequency.value = long ? 1320 : 880;
+            gain.gain.setValueAtTime(0.0001, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + length);
+            osc.start(); osc.stop(ctx.currentTime + length + 0.05);
+          } catch (e) { /* no audio available */ }
+        },
+        keepAwake: function (on) {
+          wantWakeLock = on;
+          if (on) requestWakeLock(); else if (wakeLock) { wakeLock.release(); wakeLock = null; }
+        },
+        // Asks the browser not to clear saved data when storage runs low.
+        keepData: function () {
+          if (!navigator.storage || !navigator.storage.persist) return;
+          navigator.storage.persisted().then(function (kept) {
+            if (!kept) return navigator.storage.persist();
+          }).catch(function () {});
+        },
+        setThemeColor: function (color) {
+          document.querySelectorAll('meta[name="theme-color"]').forEach(function (meta) {
+            meta.removeAttribute('media');
+            meta.setAttribute('content', color);
+          });
+        },
+        onChange: function (cb) { listeners.push(cb); },
+        appStarted: function () {
+          var splash = document.getElementById('splash');
+          if (splash) {
+            splash.classList.add('hide');
+            setTimeout(function () { splash.remove(); }, 400);
+          }
+          // Cache what this page loaded, for offline use.
+          if ('serviceWorker' in navigator) {
+            [3000, 15000].forEach(function (delay) {
+              setTimeout(function () {
+                navigator.serviceWorker.ready.then(function (reg) {
+                  var urls = performance.getEntriesByType('resource').map(function (e) { return e.name; });
+                  if (reg.active) reg.active.postMessage({ type: 'CACHE_URLS', urls: urls });
+                });
+              }, delay);
+            });
+          }
+        },
+      };
+
+      // Offline support (sw.js exists in release builds only).
+      if ('serviceWorker' in navigator) {
+        var hadController = !!navigator.serviceWorker.controller;
+        navigator.serviceWorker.addEventListener('controllerchange', function () {
+          // New version took over: offer a reload.
+          if (hadController) { updateReady = true; notify(); }
+          hadController = true;
+        });
+        window.addEventListener('load', function () {
+          navigator.serviceWorker.register('sw.js').catch(function () {
+            // Expected under `flutter run`.
+          });
+        });
+      }
+    })();
+  </script>
+</head>
+<body>
+  <div id="splash" role="progressbar" aria-label="Loading FitTrack">
+    <img src="icons/Icon-192.png" alt="">
+    <div class="bar"></div>
+  </div>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
