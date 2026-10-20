@@ -175,6 +175,34 @@ void main() {
     );
   });
 
+  test('plans keep 6 moves that fit the level; fat burn uses short rests', () {
+    final ids = [
+      for (final level in Level.values)
+        routineFor(
+          MuscleGroup.core,
+          Place.home,
+          level,
+        ).items.map((i) => i.exercise.id),
+    ];
+    expect(ids.map((l) => l.length), everyElement(lessThanOrEqualTo(6)));
+    expect(ids[Level.beginner.index], isNot(contains('v-up')));
+    expect(ids[Level.advanced.index], contains('v-up'));
+    expect(routineFor(MuscleGroup.core, Place.home).note, contains('body fat'));
+
+    final burn = fatBurnRoutine(Place.gym);
+    expect(burn.items, hasLength(6));
+    expect(burn.restSeconds, 30);
+    expect(burn.workoutType, WorkoutType.hiit);
+    final c = SessionController(
+      burn,
+      restSeconds: burn.restSeconds,
+      clock: clock,
+    );
+    c.startSet();
+    c.finishSet();
+    expect(c.remaining, 30);
+  });
+
   test('catalog has every group for gym and home', () {
     for (final group in MuscleGroup.values) {
       for (final place in Place.values) {

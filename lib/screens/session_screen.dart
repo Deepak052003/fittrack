@@ -29,7 +29,9 @@ class _SessionScreenState extends State<SessionScreen> {
   late final _controller =
       SessionController(
           widget.routine,
-          restSeconds: StoreScope.read(context).restSeconds,
+          restSeconds:
+              widget.routine.restSeconds ??
+              StoreScope.read(context).restSeconds,
         )
         ..onAlert = _alert
         ..onCountdown = _tick
@@ -279,6 +281,28 @@ class _Header extends StatelessWidget {
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.headlineSmall
               ?.copyWith(fontWeight: FontWeight.w800),
+        ),
+        // One short form cue; the full steps stay on the exercise page.
+        Padding(
+          padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.lightbulb_outline, size: 16, color: coral),
+              const SizedBox(width: 6),
+              Flexible(
+                child: Text(
+                  e.tip,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ],
     );

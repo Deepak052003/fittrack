@@ -51,6 +51,10 @@ SVG frames from [github.com/ozansozuozgit/flow-exercise-dataset](https://github.
 | `pike-push-up.mp4` | 1296 |
 | `reverse-snow-angel.mp4` | 0348 |
 | `wall-walk.mp4` | 3662, 3302 |
+| `reverse-crunch.mp4` | 0872 |
+| `russian-twist.mp4` | 0687 |
+| `flutter-kicks.mp4` | 0459 |
+| `v-up.mp4` | 0507 |
 
 ## Added by the owner (stock footage)
 

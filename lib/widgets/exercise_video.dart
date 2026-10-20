@@ -74,7 +74,8 @@ class ExerciseClip extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: AspectRatio(
-          aspectRatio: 16 / 9,
+          // Taller than 16:9 so the square exercise animations show bigger.
+          aspectRatio: 4 / 3,
           child: FutureBuilder<OwnVideo?>(
             future: findOwnVideo(exercise),
             builder: (context, snapshot) {

@@ -71,6 +71,12 @@ class TrainingScreen extends StatelessWidget {
               routine: routineFor(groupForDay(now), store.place, store.level),
               level: store.level,
             ),
+            const SectionHeader('Burn fat'),
+            _BodyPartCard(
+              routine: fatBurnRoutine(store.place, store.level),
+              level: store.level,
+              title: 'Fat burn circuit',
+            ),
             const SectionHeader('Body focus'),
             Wrap(
               spacing: 8,
@@ -339,10 +345,13 @@ class _TodayCard extends StatelessWidget {
 }
 
 class _BodyPartCard extends StatelessWidget {
-  const _BodyPartCard({required this.routine, required this.level});
+  const _BodyPartCard({required this.routine, required this.level, this.title});
 
   final Routine routine;
   final Level level;
+
+  /// Defaults to the muscle group name.
+  final String? title;
 
   @override
   Widget build(BuildContext context) {
@@ -362,7 +371,7 @@ class _BodyPartCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      routine.group!.label,
+                      title ?? routine.group!.label,
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: 4),

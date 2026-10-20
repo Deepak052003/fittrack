@@ -33,6 +33,8 @@ class _StartWorkoutSheetState extends State<StartWorkoutSheet> {
     items: _items,
     place: widget.routine.place,
     group: widget.routine.group,
+    note: widget.routine.note,
+    restSeconds: widget.routine.restSeconds,
   );
 
   Future<void> _edit(int index) async {

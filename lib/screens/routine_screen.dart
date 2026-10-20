@@ -65,6 +65,29 @@ class RoutineScreen extends StatelessWidget {
                 background: _Hero(routine: routine, level: level),
               ),
             ),
+            if (routine.note case final note?)
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+                sliver: SliverToBoxAdapter(
+                  child: Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(14),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.lightbulb_outline, color: coral),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Text(
+                              note,
+                              style: theme.textTheme.bodyMedium,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             SliverPadding(
               padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
               sliver: SliverList.separated(

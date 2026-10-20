@@ -7,7 +7,7 @@ Exercises without a clip show an icon instead.
 After adding clips, run `npm run compress-videos` (in FitnessTrackerApp). It shrinks them to HD
 and makes the thumbnails (`<name>.jpg`). Keep your own copy of the original clips; the files here are replaced by the smaller versions.
 
-Done: **63 of 63**. Sources: [CLIP_SOURCES.md](CLIP_SOURCES.md).
+Done: **67 of 67**. Sources: [CLIP_SOURCES.md](CLIP_SOURCES.md).
 
 ## Chest
 
@@ -92,6 +92,10 @@ Done: **63 of 63**. Sources: [CLIP_SOURCES.md](CLIP_SOURCES.md).
 | ✅ | Dead Bug | Home | `dead-bug.mp4` |
 | ✅ | Mountain Climber | Home | `mountain-climber.mp4` |
 | ✅ | Lying Leg Raise | Home | `lying-leg-raise.mp4` |
+| ✅ | Reverse Crunch | Home | `reverse-crunch.mp4` |
+| ✅ | Russian Twist | Home | `russian-twist.mp4` |
+| ✅ | Flutter Kicks | Home | `flutter-kicks.mp4` |
+| ✅ | V-Up | Home | `v-up.mp4` |
 
 ## Cardio
 

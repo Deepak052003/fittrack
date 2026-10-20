@@ -323,12 +323,20 @@ class Routine {
     required this.items,
     required this.place,
     this.group,
+    this.note,
+    this.restSeconds,
   });
 
   final String name;
   final List<RoutineItem> items;
   final Place place;
   final MuscleGroup? group;
+
+  /// Short advice shown above the exercise list.
+  final String? note;
+
+  /// Rest for this routine, instead of the user's setting (e.g. circuits).
+  final int? restSeconds;
 
   int get totalSets => items.fold(0, (sum, i) => sum + i.sets);
 
